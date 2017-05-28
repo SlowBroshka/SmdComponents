@@ -4,80 +4,59 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/types_c.h>
-
 #include "Contour.h"
 #include "HelpFunc.h"
+#include "Line.h"
+#include <ctime>
 
 using namespace std;
 using namespace cv;
 
-Mat src; Mat src_gray, _src_gray;
-int thresh = 100;
-int max_thresh = 255;
 int adkernel = 128;
-int max_adkernel = 255;
-
-RNG rng(12345);
-
-
-void thresh_callback(int, void* );
+Mat src; Mat src_gray, _src_gray, canny;
 
 void adaptivethresh_callback(int, void* );
 
-int main( int argc, char** argv ) {
+int main(int argc, char** argv ) {
 
-    string filename = "/home/slowbro/Изображения/Elements/5.jpg";
+    string filename = "/home/slowbro/Изображения/Elements/6.jpg";
     src = imread(filename, 1 );
 
-    /// Convert image to gray and blur it
-    cvtColor( src, _src_gray, CV_BGR2GRAY );
-    blur( _src_gray, src_gray, Size(3,3) );
+    cvtColor( src, _src_gray, CV_BGR2GRAY );  //to binary
+
+    //imwrite("/home/slowbro/Изображения/Elements/6Gray.jpg", _src_gray);
+
+    blur( _src_gray, src_gray, BLUR_RANGE);   //add blur minimize
+
+    uint stime = clock();
 
     /// Create Window
-    char* source_window = "Source";
-    namedWindow( source_window, CV_WINDOW_AUTOSIZE );
+    string source_window = "Source";
     imshow( source_window, src );
 
-    createTrackbar(" AdBin", "Source", &adkernel, max_adkernel, adaptivethresh_callback);
-    createTrackbar( " Canny thresh:", "Source", &thresh, max_thresh, thresh_callback );
-    thresh_callback( 0, 0 );
+    createTrackbar(" AdBin", source_window, &adkernel, max_adkernel, adaptivethresh_callback);
 
-    waitKey(0);
+    waitKey();
+
     return(0);
 }
-
-
 void adaptivethresh_callback(int, void* ){
-    //Mat adgrey;
+
     threshold(_src_gray, src_gray, adkernel, 255, THRESH_BINARY_INV);
 
-    imshow("adGray",src_gray);
+
+    //double angle1 = GetOutPutAngle(src_gray);
+    //double angle2 = GetOutPutAngle2(src_gray);
+    //cout<<"Try1: "<<angle1<<endl;
+    //cout<<"Try2: "<<angle2<<endl;
+    double angle3 = GetOutPutAngel3(src_gray);
+    cout<<angle3<<endl;
+    RotateShowImage("Try3", src_gray, angle3);
+
+    //RotateShowImage("Try1", src_gray, angle1);
+    //RotateShowImage("Try2", src_gray, angle2);
 
 }
-void thresh_callback(int, void* )
-{
-    Mat canny_output;
-    vector<vector<Point>> contours;
-    vector<Vec4i> hierarchy;
 
-    /// Detect edges using canny
-    Canny( src_gray, canny_output, thresh, thresh*2, 3 );
-    /// Find contours
-    findContours( src_gray, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
-    /// Draw contours
-    Mat drawing = Mat::zeros( src_gray.size(), CV_8UC3);
-    for( int i = 0; i< contours.size(); i++ )
-    {
-        if (contours.size() >= 4 && contourArea(contours[i]) > 100) {
-            Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-            drawContours(drawing, contours, i, color, 2, 8, hierarchy, 0, Point());
-            cout << "№ " << i << " Points: " << contours[i].size() << endl;
-            for (auto j = 0; j < contours[i].size(); j++) {
-                cout <<j<< " X= " << contours[i][j].x << " Y= " << contours[i][j].y << endl;
-            }
-        }
-    }
-    namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-    imshow( "Contours", drawing );
-}
+

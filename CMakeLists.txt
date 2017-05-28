@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-set(SOURCE_FILES main.cpp test.cpp Contour.cpp Contour.h HelpFunc.cpp HelpFunc.h)
+set(SOURCE_FILES main.cpp test.cpp Contour.cpp Contour.h HelpFunc.cpp HelpFunc.h Consts.h Line.cpp Line.h)
 add_executable(SmdComponents ${SOURCE_FILES})
 
 target_link_libraries( SmdComponents ${OpenCV_LIBS} )
