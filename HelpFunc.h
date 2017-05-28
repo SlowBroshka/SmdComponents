@@ -40,10 +40,12 @@ void GetMinAngelsLines(const vector<Line> &Horisontal, const vector<Line> &Verti
 
 double GetOutPutAngle(Mat &);
 double GetOutPutAngle2(Mat &);
-double GetOutPutAngel3(Mat& src_gray);
+double GetOutPutAngel3(Mat &);
 vector<Point> GetMaxContour(Mat& );
 
 void RotateShowImage(const string &, const Mat &, const double);
+
+Mat DrawInterface(const Mat &, Mat &, const double);
 
 
 #endif //SMDCOMPONENTS_HELPFUNC_H
