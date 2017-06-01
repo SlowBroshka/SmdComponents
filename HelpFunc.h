@@ -38,9 +38,9 @@ void GetMinAngelsLines(const vector<Line> &Horisontal, const vector<Line> &Verti
                        const vector<pair<size_t, double>> &angels, vector<pair<size_t, size_t>> &min_angels_indexes);
 
 
-double GetOutPutAngle(Mat &);
-double GetOutPutAngle2(Mat &);
-double GetOutPutAngel3(Mat &);
+double getAngle1(Mat &);
+double getAngle2(Mat &);
+double getAngle3(Mat &);
 vector<Point> GetMaxContour(Mat& );
 
 void RotateShowImage(const string &, const Mat &, const double);

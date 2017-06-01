@@ -29,11 +29,9 @@ int main(int argc, char** argv ) {
 
     blur( _src_gray, src_gray, BLUR_RANGE);   //add blur minimize
 
-    uint stime = clock();
-
     /// Create Window
     string source_window = "Source";
-    imshow( source_window, src );
+    imshow( source_window, src_gray);
 
     createTrackbar(" AdBin", source_window, &adkernel, max_adkernel, adaptivethresh_callback);
 
@@ -43,24 +41,31 @@ int main(int argc, char** argv ) {
 }
 void adaptivethresh_callback(int, void* ){
 
-    threshold(_src_gray, src_gray, adkernel, 255, THRESH_BINARY_INV);
+    threshold(src_gray, src_gray, adkernel, 255, THRESH_BINARY_INV);
+    imshow("1", src_gray);
 
+    uint stime, ftime;
 
-    double angle1 = GetOutPutAngle(src_gray);
-    cout<<"Try1: "<<angle1<<endl;
+    stime = clock();
+    double angle1 = getAngle1(src_gray);
+    ftime = clock();
+    cout<<"Try1: "<<angle1<<" Time: "<<ftime-stime<<endl;
     RotateShowImage("Try1", src, angle1);
 
+//    stime = clock();
+//    double angle2 = getAngle2(src_gray);
+//    ftime = clock();
+//    cout<<"Try2: "<<angle2<<" Time: "<<ftime-stime<<endl;
+//    RotateShowImage("Try2", src, angle2);
 
-    double angle2 = GetOutPutAngle2(src_gray);
-    cout<<"Try2: "<<angle2<<endl;
-    RotateShowImage("Try2", src, angle2);
-
-    double angle3 = GetOutPutAngel3(src_gray);
-    cout<<"Try3: "<<angle3<<endl;
-    RotateShowImage("Try3", src, angle3);
+//    stime = clock();
+//    double angle3 = getAngle3(src_gray);
+//    ftime = clock();
+//    cout<<"Try3: "<<angle3<<" Time: "<<ftime-stime<<endl;
+//    RotateShowImage("Try3", src, angle3);
 
     Mat interf;
-    interf = DrawInterface(src, src_gray, angle3);
+    interf = DrawInterface(src, src_gray, angle1);
     imshow("DrawInterface", interf);
     imwrite("/home/slowbro/Изображения/Elements/6INTERF.jpg", interf);
 }

@@ -109,7 +109,7 @@ double GetDeviation(const double angel, const double ideal){
     return abs(ideal - angel);
 }
 
-double GetOutPutAngle(Mat & src_gray) {
+double getAngle1(Mat &src_gray) {
 
     double min_angle = 90;
 
@@ -144,14 +144,15 @@ double GetOutPutAngle(Mat & src_gray) {
     GetMinAngelsLines(Horisontal, Vertical, min_angle, angels, min_angels_indexes);
 
     for(auto i = 0; i < min_angels_indexes.size(); i++){
-        line(drawingHaff, Horisontal[min_angels_indexes[i].first].getP1(), Horisontal[min_angels_indexes[i].first].getP2(), Scalar(255, 255, 255), 4, FILLED);
-        line(drawingHaff, Vertical[min_angels_indexes[i].second].getP1(), Vertical[min_angels_indexes[i].second].getP2(), Scalar(255, 255, 255), 2, FILLED);
+        line(drawingHaff, Horisontal[min_angels_indexes[0].first].getP1(), Horisontal[min_angels_indexes[0].first].getP2(), Scalar(255, 255, 255), 4, FILLED);
+        line(drawingHaff, Vertical[min_angels_indexes[0].second].getP1(), Vertical[min_angels_indexes[0].second].getP2(), Scalar(255, 255, 255), 4, FILLED);
         cout<<"angel "<<i<<" - "<<Horisontal[min_angels_indexes[i].first].CalcAngel(Line(Point(0, 0), Point(0, 100)))<<endl;
     }
-   // imwrite("/home/slowbro/Изображения/Elements/RISUNOK8.jpg", drawingHaff);
+    imwrite("/home/slowbro/Изображения/Elements/RISUNOK8.jpg", drawingHaff);
 
     double rotate_angle = Horisontal[min_angels_indexes[0].first].CalcAngel(Line(Point(0, 0), Point(0, 100)));
-    if (rotate_angle >= 90) rotate_angle -= 90;
+    if (rotate_angle >= 90)
+        rotate_angle = fmod(rotate_angle, 90);
 
     //imshow("contour", drawingHaff);
     //imshow("ROI", ROIsrc_gray);
@@ -184,13 +185,14 @@ void DistribLines(const Mat &drawingHaff, const vector<Vec4i> &lines, vector<Lin
             double alpha = Horisontal[0].CalcAngel(linel);
             if (alpha >= 45 && alpha <= 135) {
                 Horisontal.push_back(linel);
-                //line(drawingHaff, linel.getP1(), linel.getP2(), Scalar(0, 0, 255), 3, FILLED);
+                line(drawingHaff, linel.getP1(), linel.getP2(), Scalar(255, 255, 255), 2, FILLED);
             } else {
-                //line(drawingHaff, linel.getP1(), linel.getP2(), Scalar(0, 255, 0), 3, FILLED);
+                line(drawingHaff, linel.getP1(), linel.getP2(), Scalar(255, 255, 255), 2, FILLED);
                 Vertical.push_back(linel);
             }
         }
     }
+    imwrite("/home/slowbro/Изображения/Elements/6Lines.jpg", drawingHaff);
 }
 
 vector<Point> GetMaxContour(Mat &src_gray) {
@@ -209,7 +211,7 @@ vector<Point> GetMaxContour(Mat &src_gray) {
     }
     return contours[contour_num];
 }
- double GetOutPutAngle2(Mat &src_gray){
+ double getAngle2(Mat &src_gray){
      vector<Point> cont_points = GetMaxContour(src_gray);
 
      Rect ROIRect = GetRoiRect(cont_points);
@@ -226,30 +228,15 @@ vector<Point> GetMaxContour(Mat &src_gray) {
      double middle_horisontal_angel = GetMiddleAngel(Horisontal);
      double middle_vertical_angel = GetMiddleAngel(Vertical);
 
+
      if (middle_horisontal_angel != 0 && middle_horisontal_angel != 0)
          return (middle_horisontal_angel + middle_vertical_angel) / 2.0;
      else
          return (middle_horisontal_angel == 0 ? middle_vertical_angel : middle_horisontal_angel);
  }
 
-double GetMiddleAngel(const vector<Line> &Horisontal) {
-    auto zero_counter = 0;
-    double middle_angel = 0;
-    for (auto i = 0; i < Horisontal.size(); i++) {
-        double angle = 0;
-        angle = Horisontal[i].CalcAngel(Line(Point(0, 0), Point(0, 100)));
-        if (angle >= 90) angle -= 90;
-        zero_counter += angle != 0 ? 1 : 0;
-        middle_angel += angle;
-    }
-    if (middle_angel != 0)
-        middle_angel /= zero_counter;
-    else
-        middle_angel = 0;
-    return middle_angel;
-}
-double GetOutPutAngel3(Mat &src_gray) {
 
+double getAngle3(Mat &src_gray) {
 
     vector<Point> cont_points = GetMaxContour(src_gray);
 
@@ -261,8 +248,8 @@ double GetOutPutAngel3(Mat &src_gray) {
     vector<Vec4i> lines;
     vector<size_t> weight;
 
-    int rmax =  round(sqrt(src_gray.cols * src_gray.cols +
-                           src_gray.rows * src_gray.rows));
+    int rmax =  static_cast<int>(round(sqrt(src_gray.cols * src_gray.cols +
+                           src_gray.rows * src_gray.rows)));
 
     //Mat phase(Size(rmax, 180), IPL_DEPTH_16U, 1);
     Mat phase = Mat::zeros(Size(rmax, 180), CV_8UC1);
@@ -293,27 +280,27 @@ double GetOutPutAngel3(Mat &src_gray) {
             }
         }
     }
-    cout<<"MAX: "<<(int)max<<endl;
+    //cout<<"MAX: "<<(int)max<<endl;
     for (auto i = 0; i < rmax; i++){
         for (auto j = 0; j < 180; j++){
             phase.at<uchar>(j, i) = (uchar)((255 * phase.at<uchar>(j, i)) / max);
         }
     }
 
-    int x0 = 0;
-    int y0 = (int)(line.second / sin(line.first * CV_PI / 180.0));
+//    int x0 = 0;
+//    int y0 = (int)(line.second / sin(line.first * CV_PI / 180.0));
+//
+//    int x1 = ROIsrc_gray.cols;
+//    int y1 = (int)(-(cos(line.first * CV_PI / 180.0)/sin(line.first * CV_PI / 180.0)) * x1 +
+//                   (line.second / sin(line.first * CV_PI / 180.0)));
 
-    int x1 = ROIsrc_gray.cols;
-    int y1 = (int)(-(cos(line.first * CV_PI / 180.0)/sin(line.first * CV_PI / 180.0)) * x1 +
-                   (line.second / sin(line.first * CV_PI / 180.0)));
 
+    //cout<<Point(x0, y0)<<" "<<Point(x1, y1)<<endl;
 
-    cout<<Point(x0, y0)<<" "<<Point(x1, y1)<<endl;
-
-    cv::line(ROIsrc_gray, Point(x0, y0), Point(x1, y1), Scalar(0, 0, 255), 3, FILLED);
+    //cv::line(ROIsrc_gray, Point(x0, y0), Point(x1, y1), Scalar(0, 0, 255), 3, FILLED);
 
     //resize(phase,phase, Size(phase.cols, phase.rows * 3), 0, 0, INTER_LINEAR);
-    imshow("src_gray", ROIsrc_gray);
+    //imshow("src_gray", ROIsrc_gray);
     //imwrite("/home/slowbro/Изображения/Elements/PHOUGHT_notresize.jpg", phase);
 
    // imshow("ROIsrc_gray", ROIsrc_gray);
@@ -330,7 +317,23 @@ void RotateShowImage(const string &filename, const Mat &img, const double angle)
     warpAffine(img, dst, r, img.size());  // what size I should use?
     imshow(filename, dst);
 }
-
+double GetMiddleAngel(const vector<Line> &Horisontal) {
+    auto zero_counter = 0;
+    double middle_angel = 0;
+    for (auto i = 0; i < Horisontal.size(); i++) {
+        double angle = 0;
+        angle = Horisontal[i].CalcAngel(Line(Point(0, 0), Point(0, 100)));
+        if (angle >= 90)
+            angle = fmod(angle,90.0);
+        zero_counter += (angle != 0) ? 1 : 0;
+        middle_angel += angle;
+    }
+    if (middle_angel != 0)
+        middle_angel /= zero_counter;
+    else
+        middle_angel = 0;
+    return middle_angel;
+}
 Mat DrawInterface(const Mat &src, Mat &src_gray, const double angle){
 
     Mat srcclone = src.clone();
